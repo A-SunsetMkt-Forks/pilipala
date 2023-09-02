@@ -14,7 +14,7 @@ class MainController extends GetxController {
   List<Widget> pages = <Widget>[
     const HomePage(),
     const DynamicsPage(),
-    const MediaPage(),
+    // const MediaPage(),
   ];
   RxList navigationBars = [
     {
@@ -39,17 +39,17 @@ class MainController extends GetxController {
       ),
       'label': "动态",
     },
-    {
-      'icon': const Icon(
-        Icons.folder_outlined,
-        size: 20,
-      ),
-      'selectIcon': const Icon(
-        Icons.folder,
-        size: 21,
-      ),
-      'label': "媒体库",
-    }
+    // {
+    //   'icon': const Icon(
+    //     Icons.folder_outlined,
+    //     size: 20,
+    //   ),
+    //   'selectIcon': const Icon(
+    //     Icons.folder,
+    //     size: 21,
+    //   ),
+    //   'label': "媒体库",
+    // }
   ].obs;
   final StreamController<bool> bottomBarStream =
       StreamController<bool>.broadcast();
