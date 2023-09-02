@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:get/get.dart';
 import 'package:pilipala/common/widgets/http_error.dart';
+import 'package:pilipala/pages/mine/index.dart';
+import 'package:pilipala/utils/feed_back.dart';
 import 'controller.dart';
 import 'widgets/hot_keyword.dart';
 import 'widgets/search_text.dart';
@@ -70,6 +72,18 @@ class _SearchPageState extends State<SearchPage> with RouteAware {
                   .primaryContainer
                   .withOpacity(0.3),
               onTap: openContainer,
+              onLongPress: () {
+                feedBack();
+                showModalBottomSheet(
+                  context: context,
+                  builder: (_) => const SizedBox(
+                    height: 450,
+                    child: MinePage(),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  isScrollControlled: true,
+                );
+              },
               child: Row(
                 children: [
                   const SizedBox(width: 14),

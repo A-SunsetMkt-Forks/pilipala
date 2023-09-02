@@ -129,59 +129,59 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: Row(
                 children: [
                   const Expanded(child: SearchPage()),
-                  const SizedBox(width: 10),
-                  Obx(
-                    () => ctr!.userLogin.value
-                        ? Stack(
-                            children: [
-                              Obx(
-                                () => NetworkImgLayer(
-                                  type: 'avatar',
-                                  width: 34,
-                                  height: 34,
-                                  src: ctr!.userFace.value,
-                                ),
-                              ),
-                              Positioned.fill(
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () => callback!(),
-                                    splashColor: Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                        .withOpacity(0.3),
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(50),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        : SizedBox(
-                            width: 38,
-                            height: 38,
-                            child: IconButton(
-                              style: ButtonStyle(
-                                padding:
-                                    MaterialStateProperty.all(EdgeInsets.zero),
-                                backgroundColor:
-                                    MaterialStateProperty.resolveWith((states) {
-                                  return Theme.of(context)
-                                      .colorScheme
-                                      .onInverseSurface;
-                                }),
-                              ),
-                              onPressed: () => callback!(),
-                              icon: Icon(
-                                Icons.person_rounded,
-                                size: 22,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                  ),
+                  // const SizedBox(width: 10),
+                  // Obx(
+                  //   () => ctr!.userLogin.value
+                  //       ? Stack(
+                  //           children: [
+                  //             Obx(
+                  //               () => NetworkImgLayer(
+                  //                 type: 'avatar',
+                  //                 width: 34,
+                  //                 height: 34,
+                  //                 src: ctr!.userFace.value,
+                  //               ),
+                  //             ),
+                  //             Positioned.fill(
+                  //               child: Material(
+                  //                 color: Colors.transparent,
+                  //                 child: InkWell(
+                  //                   onTap: () => callback!(),
+                  //                   splashColor: Theme.of(context)
+                  //                       .colorScheme
+                  //                       .primaryContainer
+                  //                       .withOpacity(0.3),
+                  //                   borderRadius: const BorderRadius.all(
+                  //                     Radius.circular(50),
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //             )
+                  //           ],
+                  //         )
+                  //       : SizedBox(
+                  //           width: 38,
+                  //           height: 38,
+                  //           child: IconButton(
+                  //             style: ButtonStyle(
+                  //               padding:
+                  //                   MaterialStateProperty.all(EdgeInsets.zero),
+                  //               backgroundColor:
+                  //                   MaterialStateProperty.resolveWith((states) {
+                  //                 return Theme.of(context)
+                  //                     .colorScheme
+                  //                     .onInverseSurface;
+                  //               }),
+                  //             ),
+                  //             onPressed: () => callback!(),
+                  //             icon: Icon(
+                  //               Icons.person_rounded,
+                  //               size: 22,
+                  //               color: Theme.of(context).colorScheme.primary,
+                  //             ),
+                  //           ),
+                  //         ),
+                  // ),
                 ],
               ),
             ),
