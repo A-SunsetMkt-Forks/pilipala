@@ -16,11 +16,13 @@ import 'package:pilipala/plugin/pl_player/index.dart';
 import 'package:pilipala/utils/feed_back.dart';
 import 'package:pilipala/utils/storage.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:status_bar_control/status_bar_control.dart';
 import 'package:universal_platform/universal_platform.dart';
 // import 'package:wakelock_plus/wakelock_plus.dart';
 
 Box videoStorage = GStrorage.video;
 Box setting = GStrorage.setting;
+Box localCache = GStrorage.localCache;
 
 class PlPlayerController {
   Player? _videoPlayerController;
@@ -104,6 +106,7 @@ class PlPlayerController {
   ];
 
   PreferredSizeWidget? headerControl;
+  PreferredSizeWidget? bottomControl;
   Widget? danmuWidget;
 
   /// 数据加载监听
@@ -199,12 +202,30 @@ class PlPlayerController {
   Rx<bool> isOpenDanmu = false.obs;
   // 关联弹幕控制器
   DanmakuController? danmakuController;
+  // 弹幕相关配置
+  late List blockTypes;
+  late double showArea;
+  late double opacityVal;
+  late double fontSizeVal;
+  late double danmakuSpeedVal;
 
   // 添加一个私有构造函数
   PlPlayerController._() {
     _videoType = videoType;
     isOpenDanmu.value =
         setting.get(SettingBoxKey.enableShowDanmaku, defaultValue: false);
+    blockTypes =
+        localCache.get(LocalCacheKey.danmakuBlockType, defaultValue: []);
+    showArea = localCache.get(LocalCacheKey.danmakuShowArea, defaultValue: 0.5);
+    // 不透明度
+    opacityVal =
+        localCache.get(LocalCacheKey.danmakuOpacity, defaultValue: 1.0);
+    // 字体大小
+    fontSizeVal =
+        localCache.get(LocalCacheKey.danmakuFontScale, defaultValue: 1.0);
+    // 弹幕速度
+    danmakuSpeedVal =
+        localCache.get(LocalCacheKey.danmakuSpeed, defaultValue: 4.0);
     // _playerEventSubs = onPlayerStatusChanged.listen((PlayerStatus status) {
     //   if (status == PlayerStatus.playing) {
     //     WakelockPlus.enable();
@@ -524,6 +545,12 @@ class PlPlayerController {
   /// 设置倍速
   Future<void> setPlaybackSpeed(double speed) async {
     await _videoPlayerController?.setRate(speed);
+    try {
+      DanmakuOption currentOption = danmakuController!.option;
+      DanmakuOption updatedOption = currentOption.copyWith(
+          duration: (currentOption.duration / speed) * playbackSpeed);
+      danmakuController!.updateOption(updatedOption);
+    } catch (_) {}
     _playbackSpeed.value = speed;
   }
 
@@ -730,6 +757,9 @@ class PlPlayerController {
     if (videoType.value == 'live') {
       return;
     }
+    if (controlsLock.value) {
+      return;
+    }
     _doubleSpeedStatus.value = val;
     double currentSpeed = playbackSpeed;
     if (val) {
@@ -754,7 +784,7 @@ class PlPlayerController {
   Future<void> triggerFullScreen({bool status = true}) async {
     FullScreenMode mode = FullScreenModeCode.fromCode(
         setting.get(SettingBoxKey.fullScreenMode, defaultValue: 0))!;
-
+    await StatusBarControl.setHidden(true, animation: StatusBarAnimation.FADE);
     if (!isFullScreen.value && status) {
       /// 按照视频宽高比决定全屏方向
       switch (mode) {
@@ -773,7 +803,7 @@ class PlPlayerController {
 
           /// 进入全屏
           await enterFullScreen();
-          // 横屏
+          // 竖屏
           await verticalScreen();
           break;
         case FullScreenMode.horizontal:
@@ -791,20 +821,29 @@ class PlPlayerController {
         useSafeArea: false,
         builder: (context) => Dialog.fullscreen(
           backgroundColor: Colors.black,
-          child: PLVideoPlayer(
-            controller: this,
-            headerControl: headerControl,
-            danmuWidget: danmuWidget,
+          child: SafeArea(
+            bottom:
+                direction.value == 'vertical' || mode == FullScreenMode.vertical
+                    ? true
+                    : false,
+            child: PLVideoPlayer(
+              controller: this,
+              headerControl: headerControl,
+              bottomControl: bottomControl,
+              danmuWidget: danmuWidget,
+            ),
           ),
         ),
       );
       if (result == null) {
         // 退出全屏
+        StatusBarControl.setHidden(false, animation: StatusBarAnimation.FADE);
         exitFullScreen();
         await verticalScreen();
         toggleFullScreen(false);
       }
     } else if (isFullScreen.value) {
+      StatusBarControl.setHidden(false, animation: StatusBarAnimation.FADE);
       Get.back();
       exitFullScreen();
       await verticalScreen();
@@ -841,6 +880,9 @@ class PlPlayerController {
   Future makeHeartBeat(progress, {type = 'playing'}) async {
     if (!_enableHeart) {
       return false;
+    }
+    if (videoType.value == 'live') {
+      return;
     }
     // 播放状态变化时，更新
     if (type == 'status') {
@@ -890,6 +932,13 @@ class PlPlayerController {
 
       // playerStatus.status.close();
       // dataStatus.status.close();
+
+      /// 缓存本次弹幕选项
+      localCache.put(LocalCacheKey.danmakuBlockType, blockTypes);
+      localCache.put(LocalCacheKey.danmakuShowArea, showArea);
+      localCache.put(LocalCacheKey.danmakuOpacity, opacityVal);
+      localCache.put(LocalCacheKey.danmakuFontScale, fontSizeVal);
+      localCache.put(LocalCacheKey.danmakuSpeed, danmakuSpeedVal);
 
       removeListeners();
       await _videoPlayerController?.dispose();

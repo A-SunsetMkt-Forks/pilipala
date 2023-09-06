@@ -34,7 +34,12 @@ class GStrorage {
       },
     );
     // 本地缓存
-    localCache = await Hive.openBox('localCache');
+    localCache = await Hive.openBox(
+      'localCache',
+      compactionStrategy: (entries, deletedEntries) {
+        return deletedEntries > 4;
+      },
+    );
     // 设置
     setting = await Hive.openBox('setting');
     // 搜索历史
@@ -113,6 +118,8 @@ class SettingBoxKey {
   static const String enableHotKey = 'enableHotKey';
   static const String enableQuickFav = 'enableQuickFav';
   static const String enableWordRe = 'enableWordRe';
+  static const String enableSearchWord = 'enableSearchWord';
+  static const String enableRcmdDynamic = 'enableRcmdDynamic';
 
   /// 外观
   static const String themeMode = 'themeMode';
@@ -132,6 +139,13 @@ class LocalCacheKey {
   //
   static const String wbiKeys = 'wbiKeys';
   static const String timeStamp = 'timeStamp';
+
+  // 弹幕相关设置 屏蔽类型 显示区域 透明度 字体大小 弹幕速度
+  static const String danmakuBlockType = 'danmakuBlockType';
+  static const String danmakuShowArea = 'danmakuShowArea';
+  static const String danmakuOpacity = 'danmakuOpacity';
+  static const String danmakuFontScale = 'danmakuFontScale';
+  static const String danmakuSpeed = 'danmakuSpeed';
 }
 
 class VideoBoxKey {

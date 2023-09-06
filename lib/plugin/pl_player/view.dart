@@ -29,11 +29,13 @@ import 'widgets/forward_seek.dart';
 class PLVideoPlayer extends StatefulWidget {
   final PlPlayerController controller;
   final PreferredSizeWidget? headerControl;
+  final PreferredSizeWidget? bottomControl;
   final Widget? danmuWidget;
 
   const PLVideoPlayer({
     required this.controller,
     this.headerControl,
+    this.bottomControl,
     this.danmuWidget,
     super.key,
   });
@@ -120,6 +122,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         vsync: this, duration: const Duration(milliseconds: 300));
     videoController = widget.controller.videoController!;
     widget.controller.headerControl = widget.headerControl;
+    widget.controller.bottomControl = widget.bottomControl;
     widget.controller.danmuWidget = widget.danmuWidget;
     defaultBtmProgressBehavior = setting.get(SettingBoxKey.btmProgressBehavior,
         defaultValue: BtmProgresBehavior.values.first.code);
@@ -239,35 +242,25 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           () => Align(
             alignment: Alignment.topCenter,
             child: FractionalTranslation(
-              translation: const Offset(0.0, 1), // 上下偏移量（负数向上偏移）
+              translation: const Offset(0.0, 0.3), // 上下偏移量（负数向上偏移）
               child: AnimatedOpacity(
                 curve: Curves.easeInOut,
                 opacity: _.doubleSpeedStatus.value ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 150),
                 child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: const Color(0x88000000),
-                    borderRadius: BorderRadius.circular(64.0),
-                  ),
-                  height: 34.0,
-                  width: 86.0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const SizedBox(width: 3),
-                      Image.asset(
-                        'assets/images/run-pokemon.gif',
-                        height: 20,
-                      ),
-                      const Text(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0x88000000),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    height: 32.0,
+                    width: 70.0,
+                    child: const Center(
+                      child: Text(
                         '倍速中',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+                        style: TextStyle(color: Colors.white, fontSize: 13),
                       ),
-                      const SizedBox(width: 4),
-                    ],
-                  ),
-                ),
+                    )),
               ),
             ),
           ),
@@ -427,23 +420,23 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           ),
         ),
 
-        Obx(() {
-          if (_.buffered.value == Duration.zero) {
-            return Positioned.fill(
-              child: Container(
-                color: Colors.black,
-                child: Center(
-                  child: Image.asset(
-                    'assets/images/loading.gif',
-                    height: 25,
-                  ),
-                ),
-              ),
-            );
-          } else {
-            return Container();
-          }
-        }),
+        // Obx(() {
+        //   if (_.buffered.value == Duration.zero) {
+        //     return Positioned.fill(
+        //       child: Container(
+        //         color: Colors.black,
+        //         child: Center(
+        //           child: Image.asset(
+        //             'assets/images/loading.gif',
+        //             height: 25,
+        //           ),
+        //         ),
+        //       ),
+        //     );
+        //   } else {
+        //     return Container();
+        //   }
+        // }),
 
         /// 弹幕面板
         if (widget.danmuWidget != null)
@@ -562,34 +555,33 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
         // 头部、底部控制条
         Obx(
-          () => Visibility(
-            visible: _.videoType.value != 'live',
-            child: Column(
-              children: [
-                if (widget.headerControl != null)
-                  ClipRect(
-                    clipBehavior: Clip.hardEdge,
-                    child: AppBarAni(
-                      controller: animationController,
-                      visible: !_.controlsLock.value && _.showControls.value,
-                      position: 'top',
-                      child: widget.headerControl!,
-                    ),
-                  ),
-                const Spacer(),
+          () => Column(
+            children: [
+              if (widget.headerControl != null)
                 ClipRect(
                   clipBehavior: Clip.hardEdge,
                   child: AppBarAni(
                     controller: animationController,
                     visible: !_.controlsLock.value && _.showControls.value,
-                    position: 'bottom',
-                    child: BottomControl(
-                        controller: widget.controller,
-                        triggerFullScreen: widget.controller.triggerFullScreen),
+                    position: 'top',
+                    child: widget.headerControl!,
                   ),
                 ),
-              ],
-            ),
+              const Spacer(),
+              ClipRect(
+                clipBehavior: Clip.hardEdge,
+                child: AppBarAni(
+                  controller: animationController,
+                  visible: !_.controlsLock.value && _.showControls.value,
+                  position: 'bottom',
+                  child: widget.bottomControl ??
+                      BottomControl(
+                          controller: widget.controller,
+                          triggerFullScreen:
+                              widget.controller.triggerFullScreen),
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -606,6 +598,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             if (defaultBtmProgressBehavior ==
                     BtmProgresBehavior.onlyShowFullScreen.code &&
                 !_.isFullScreen.value) {
+              return Container();
+            }
+
+            if (_.videoType.value == 'live') {
               return Container();
             }
             if (value > max || max <= 0) {
