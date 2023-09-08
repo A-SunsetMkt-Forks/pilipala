@@ -393,21 +393,15 @@ class PlPlayerController {
         Media(assetUrl, httpHeaders: dataSource.httpHeaders),
         play: false,
       );
-    } else if (dataSource.type == DataSourceType.network) {
-      player.open(
-        Media(dataSource.videoSource!, httpHeaders: dataSource.httpHeaders),
-        play: false,
-      );
-      // 音轨
-      // player.setAudioTrack(
-      //   AudioTrack.uri(dataSource.audioSource!),
-      // );
-    } else {
-      player.open(
-        Media(dataSource.file!.path, httpHeaders: dataSource.httpHeaders),
-        play: false,
-      );
     }
+    player.open(
+      Media(dataSource.videoSource!, httpHeaders: dataSource.httpHeaders),
+      play: false,
+    );
+    // 音轨
+    // player.setAudioTrack(
+    //   AudioTrack.uri(dataSource.audioSource!),
+    // );
 
     return player;
   }
@@ -750,6 +744,10 @@ class PlPlayerController {
     if (visible) {
       _hideTaskControls();
     }
+  }
+
+  void hiddenControls(bool val) {
+    showControls.value = val;
   }
 
   /// 设置长按倍速状态 live模式下禁用

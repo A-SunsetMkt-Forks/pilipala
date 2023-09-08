@@ -72,6 +72,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   late FullScreenMode mode;
   late int defaultBtmProgressBehavior;
   late bool enableQuickDouble;
+  late bool enableBackgroundPlay;
 
   void onDoubleTapSeekBackward() {
     setState(() {
@@ -88,8 +89,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   // 双击播放、暂停
   void onDoubleTapCenter() {
     final _ = widget.controller;
-    if (_.playerStatus.status.value == PlayerStatus.playing) {
-      _.togglePlay();
+    if (_.videoPlayerController!.state.playing) {
+      _.pause();
     } else {
       _.play();
     }
@@ -128,6 +129,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         defaultValue: BtmProgresBehavior.values.first.code);
     enableQuickDouble =
         setting.get(SettingBoxKey.enableQuickDouble, defaultValue: true);
+    enableBackgroundPlay =
+        setting.get(SettingBoxKey.enableBackgroundPlay, defaultValue: false);
 
     Future.microtask(() async {
       try {
@@ -228,6 +231,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           () => Video(
             controller: videoController,
             controls: NoVideoControls,
+            pauseUponEnteringBackgroundMode: !enableBackgroundPlay,
             subtitleViewConfiguration: SubtitleViewConfiguration(
               style: subTitleStyle,
               textAlign: TextAlign.center,
