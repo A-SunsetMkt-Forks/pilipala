@@ -189,7 +189,7 @@ jobs:
       - android
       - iOS
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: Pilipala-Beta
           path: ./Pilipala-Beta
